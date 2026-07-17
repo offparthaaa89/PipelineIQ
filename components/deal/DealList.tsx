@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { DealWithRelations } from "@/types/deal";
 
 type DealListProps = {
@@ -50,49 +51,58 @@ export default function DealList({ deals }: DealListProps) {
 
           return (
             <article
-              key={deal.id}
+               key={deal.id}
               className="rounded-xl border border-white/10 bg-slate-950/60 p-5 transition hover:border-cyan-400/50"
-            >
+>
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-white">
-                    {deal.title}
-                  </h3>
+               <div>
+              <h3 className="text-lg font-semibold text-white">
+               {deal.title}
+              </h3>
 
-                  <p className="mt-1 text-sm text-slate-400">
-                    {deal.companies?.name || "Company not found"}
-                  </p>
-                </div>
+              <p className="mt-1 text-sm text-slate-400">
+               {deal.companies?.name || "Company not found"}
+              </p>
+             </div>
 
-                <span className="w-fit rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-emerald-300">
-                  {deal.stage}
-                </span>
+             <span className="w-fit rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-emerald-300">
+               {deal.stage}
+             </span>
+             </div>
+
+           <div className="mt-4 grid gap-3 text-sm text-slate-300 md:grid-cols-4">
+             <div>
+               <p className="text-slate-500">Value</p>
+                <p className="mt-1 font-semibold text-white">
+                  {formatCurrency(deal.value, deal.currency)}
+                 </p>
               </div>
 
-              <div className="mt-4 grid gap-3 text-sm text-slate-300 md:grid-cols-4">
-                <div>
-                  <p className="text-slate-500">Value</p>
-                  <p className="mt-1 font-semibold text-white">
-                    {formatCurrency(deal.value, deal.currency)}
-                  </p>
-                </div>
+              <div>
+                <p className="text-slate-500">Contact</p>
+                <p className="mt-1">{contactName}</p>
+               </div>
 
-                <div>
-                  <p className="text-slate-500">Contact</p>
-                  <p className="mt-1">{contactName}</p>
-                </div>
+               <div>
+                <p className="text-slate-500">Close Date</p>
+                <p className="mt-1">{formatDate(deal.expected_close_date)}</p>
+               </div>
 
-                <div>
-                  <p className="text-slate-500">Close Date</p>
-                  <p className="mt-1">{formatDate(deal.expected_close_date)}</p>
+               <div>
+                 <p className="text-slate-500">Status</p>
+                 <p className="mt-1 capitalize">{deal.status}</p>
                 </div>
+             </div>
 
-                <div>
-                  <p className="text-slate-500">Status</p>
-                  <p className="mt-1 capitalize">{deal.status}</p>
-                </div>
-              </div>
-            </article>
+              <div className="mt-5 flex justify-end">
+              <Link
+                href={`/dashboard/deals/${deal.id}`}
+                className="rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-cyan-400/50 hover:text-cyan-200"
+                >
+              View Details
+             </Link>
+             </div>
+           </article>
           );
         })}
       </div>

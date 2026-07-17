@@ -13,8 +13,6 @@ export default function CompaniesPage() {
   const [error, setError] = useState("");
 
   const fetchCompanies = async () => {
-    setIsLoading(true);
-    setError("");
 
     const {
       data: { user },
@@ -50,6 +48,7 @@ export default function CompaniesPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCompanies();
   }, []);
 

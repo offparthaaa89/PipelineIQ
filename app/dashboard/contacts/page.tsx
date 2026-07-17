@@ -15,8 +15,6 @@ export default function ContactsPage() {
   const [error, setError] = useState("");
 
   const fetchContactsPageData = async () => {
-    setIsLoading(true);
-    setError("");
 
     const {
       data: { user },
@@ -71,6 +69,7 @@ export default function ContactsPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchContactsPageData();
   }, []);
 

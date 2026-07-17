@@ -1,23 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ErrorState from "@/components/shared/ErrorState";
+import LoadingState from "@/components/shared/LoadingState";
+import PageHeader from "@/components/shared/PageHeader";
 import { supabase } from "@/lib/supabaseClient";
+
+const overviewCards = [
+  {
+    title: "Companies",
+    description: "Manage business accounts before linking contacts and deals.",
+    href: "/dashboard/companies",
+  },
+  {
+    title: "Contacts",
+    description: "Track people connected to your companies and opportunities.",
+    href: "/dashboard/contacts",
+  },
+  {
+    title: "Deals",
+    description: "Create, view, edit, and manage your sales opportunities.",
+    href: "/dashboard/deals",
+  },
+];
 
 export default function DashboardPage() {
   const router = useRouter();
 
   const [userEmail, setUserEmail] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function checkSession() {
-      const { data, error } = await supabase.auth.getSession();
+    const checkSession = async () => {
+      setIsLoading(true);
+      setError("");
 
-      if (error) {
-        setMessage(error.message);
-        setLoading(false);
+      const { data, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        setError(sessionError.message);
+        setIsLoading(false);
         return;
       }
 
@@ -26,66 +51,57 @@ export default function DashboardPage() {
         return;
       }
 
-      setUserEmail(data.session.user.email || "");
-      setLoading(false);
-    }
+      setUserEmail(data.session.user.email || "Logged-in user");
+      setIsLoading(false);
+    };
 
     checkSession();
   }, [router]);
 
-  async function handleLogout() {
-    setLoading(true);
-
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      setMessage(error.message);
-      setLoading(false);
-      return;
-    }
-
-    setUserEmail("");
-    router.push("/login");
-  }
-
-  if (loading) {
-    return (
-      <main className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
-        <p className="text-slate-300">Checking authentication...</p>
-      </main>
-    );
-  }
-
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-10 text-white">
-      <section className="mx-auto max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-xl">
-        <h1 className="mb-2 text-3xl font-bold">PipelineIQ Dashboard</h1>
+    <main className="min-h-screen bg-slate-950 px-5 py-8 text-white md:px-10">
+      <section className="mx-auto max-w-6xl">
+        <PageHeader
+          title="PipelineIQ Dashboard"
+          description="Your CRM command center for managing companies, contacts, and deals."
+        />
 
-        {message && (
-          <p className="mb-4 rounded-xl bg-slate-950 p-3 text-sm text-red-300">
-            {message}
-          </p>
+        {error && <ErrorState message={error} />}
+
+        {isLoading ? (
+          <LoadingState message="Checking authentication..." />
+        ) : (
+          <div className="grid gap-6">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur">
+              <p className="text-sm text-slate-400">Logged in as</p>
+              <p className="mt-2 text-lg font-semibold text-cyan-300">
+                {userEmail}
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              {overviewCards.map((card) => (
+                <Link
+                  key={card.href}
+                  href={card.href}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur transition hover:border-cyan-400/50"
+                >
+                  <h2 className="text-xl font-semibold text-white">
+                    {card.title}
+                  </h2>
+
+                  <p className="mt-3 text-sm leading-6 text-slate-400">
+                    {card.description}
+                  </p>
+
+                  <p className="mt-5 text-sm font-semibold text-cyan-300">
+                    Open {card.title} →
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
         )}
-
-        <p className="mb-6 text-slate-300">
-          You are logged in as{" "}
-          <span className="font-semibold text-blue-400">{userEmail}</span>
-        </p>
-
-        <div className="mb-6 rounded-xl border border-slate-800 bg-slate-950 p-6">
-          <h2 className="mb-2 text-xl font-semibold">CRM Dashboard</h2>
-          <p className="text-slate-400">
-            Authentication is working. Later, this page will show leads, deals,
-            companies, tasks, and follow-ups.
-          </p>
-        </div>
-
-        <button
-          onClick={handleLogout}
-          className="rounded-xl bg-red-600 px-5 py-3 font-semibold text-white transition hover:bg-red-500"
-        >
-          Logout
-        </button>
       </section>
     </main>
   );

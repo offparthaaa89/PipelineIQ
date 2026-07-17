@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import DealForm from "@/components/deal/DealForm";
 import DealList from "@/components/deal/DealList";
+import EmptyState from "@/components/shared/EmptyState";
+import ErrorState from "@/components/shared/ErrorState";
+import LoadingState from "@/components/shared/LoadingState";
+import PageHeader from "@/components/shared/PageHeader";
 import { supabase } from "@/lib/supabaseClient";
 import type { Company } from "@/types/company";
 import type { ContactWithCompany } from "@/types/contact";
@@ -17,8 +21,6 @@ export default function DealsPage() {
   const [error, setError] = useState("");
 
   const fetchDealsPageData = async () => {
-    setIsLoading(true);
-    setError("");
 
     const {
       data: { user },
@@ -97,6 +99,7 @@ export default function DealsPage() {
   };
 
   useEffect(() => {
+     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDealsPageData();
   }, []);
 
@@ -106,73 +109,70 @@ export default function DealsPage() {
     const trimmedTitle = deal.title.trim();
     const trimmedValue = deal.value.trim();
     const parsedValue = Number(trimmedValue);
-  
+
     const selectedCompany = companies.find(
       (company) => company.id === trimmedCompanyId
     );
-  
+
     const selectedContact = trimmedContactId
       ? contacts.find((contact) => contact.id === trimmedContactId)
       : null;
-  
+
     if (!trimmedCompanyId) {
       setError("Please select a company.");
       return false;
     }
-  
+
     if (!selectedCompany) {
       setError("The selected company is not available.");
       return false;
     }
-  
+
     if (!trimmedTitle) {
       setError("Deal title is required.");
       return false;
     }
-  
+
     if (trimmedTitle.length < 3) {
       setError("Deal title must be at least 3 characters.");
       return false;
     }
-  
+
     if (trimmedTitle.length > 120) {
       setError("Deal title must not exceed 120 characters.");
       return false;
     }
-  
+
     if (!trimmedValue) {
       setError("Deal value is required.");
       return false;
     }
-  
+
     if (!Number.isFinite(parsedValue)) {
       setError("Deal value must be a valid number.");
       return false;
     }
-  
+
     if (parsedValue <= 0) {
       setError("Deal value must be greater than 0.");
       return false;
     }
-  
+
     if (parsedValue > 9_999_999_999.99) {
       setError("Deal value is too large.");
       return false;
     }
-  
+
     if (trimmedContactId && !selectedContact) {
       setError("The selected contact is not available.");
       return false;
     }
-  
-    if (
-      selectedContact &&
-      selectedContact.company_id !== trimmedCompanyId
-    ) {
+
+    if (selectedContact && selectedContact.company_id !== trimmedCompanyId) {
       setError("The selected contact does not belong to this company.");
       return false;
     }
-  
+
     if (
       deal.expected_close_date &&
       Number.isNaN(new Date(deal.expected_close_date).getTime())
@@ -180,34 +180,34 @@ export default function DealsPage() {
       setError("Please select a valid expected close date.");
       return false;
     }
-  
+
     setIsSubmitting(true);
     setError("");
-  
+
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
-  
+
     if (userError) {
       setError(userError.message);
       setIsSubmitting(false);
       return false;
     }
-  
+
     if (!user) {
       setError("You must be logged in to add a deal.");
       setIsSubmitting(false);
       return false;
     }
-  
+
     const dealStatus =
       deal.stage === "won"
         ? "won"
         : deal.stage === "lost"
           ? "lost"
           : "open";
-  
+
     const { data, error: insertError } = await supabase
       .from("deals")
       .insert([
@@ -236,18 +236,15 @@ export default function DealsPage() {
         )
       `)
       .single();
-  
+
     if (insertError) {
       setError(insertError.message);
       setIsSubmitting(false);
       return false;
     }
-  
-    setDeals((currentDeals) => [
-      data as DealWithRelations,
-      ...currentDeals,
-    ]);
-  
+
+    setDeals((currentDeals) => [data as DealWithRelations, ...currentDeals]);
+
     setIsSubmitting(false);
     return true;
   };
@@ -255,31 +252,15 @@ export default function DealsPage() {
   return (
     <main className="min-h-screen bg-slate-950 px-5 py-8 text-white md:px-10">
       <section className="mx-auto max-w-6xl">
-        <div className="mb-8">
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-cyan-300">
-            PipelineIQ CRM
-          </p>
+        <PageHeader
+          title="Deal Management"
+          description="Track sales opportunities, connect them to companies and contacts, and move them through your pipeline."
+        />
 
-          <h1 className="mt-3 text-3xl font-bold md:text-5xl">
-            Deal Management
-          </h1>
-
-          <p className="mt-3 max-w-2xl text-slate-400">
-            Track sales opportunities, connect them to companies and contacts,
-            and move them through your pipeline.
-          </p>
-        </div>
-
-        {error && (
-          <div className="mb-6 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200">
-            {error}
-          </div>
-        )}
+        {error && <ErrorState message={error} />}
 
         {isLoading ? (
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-slate-300 shadow-lg backdrop-blur">
-            Loading deals data...
-          </div>
+          <LoadingState message="Loading deals data..." />
         ) : (
           <div className="grid items-start gap-6 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="lg:sticky lg:top-8">
@@ -293,14 +274,10 @@ export default function DealsPage() {
 
             <div>
               {deals.length === 0 ? (
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur">
-                  <h2 className="text-xl font-semibold text-white">
-                    No deals yet
-                  </h2>
-                  <p className="mt-2 text-sm text-slate-400">
-                    Add your first deal to start tracking your sales pipeline.
-                  </p>
-                </div>
+                <EmptyState
+                  title="No deals yet"
+                  description="Add your first deal to start tracking your sales pipeline."
+                />
               ) : (
                 <DealList deals={deals} />
               )}
