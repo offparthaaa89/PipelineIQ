@@ -51,17 +51,17 @@ export default function ContactForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur"
+      className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-lg shadow-slate-950/20"
     >
-      <div className="mb-5">
-        <h2 className="text-xl font-semibold text-white">Add Contact</h2>
-        <p className="mt-1 text-sm text-slate-400">
-          Add a person and connect them to an existing company.
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-white">Add Contact</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-400">
+          Create a contact and connect them to a company.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="md:col-span-2">
+      <div className="grid gap-4">
+        <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Company *
           </label>
@@ -71,7 +71,7 @@ export default function ContactForm({
             onChange={(event) =>
               handleChange("company_id", event.target.value)
             }
-            className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
+            className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10"
           >
             <option value="">Select a company</option>
 
@@ -100,7 +100,7 @@ export default function ContactForm({
               handleChange("first_name", event.target.value)
             }
             placeholder="Example: Shreyansh"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
+            className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10"
           />
         </div>
 
@@ -115,7 +115,7 @@ export default function ContactForm({
               handleChange("last_name", event.target.value)
             }
             placeholder="Example: Singh"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
+            className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10"
           />
         </div>
 
@@ -128,7 +128,7 @@ export default function ContactForm({
             value={formData.email}
             onChange={(event) => handleChange("email", event.target.value)}
             placeholder="name@example.com"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
+            className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10"
           />
         </div>
 
@@ -141,11 +141,11 @@ export default function ContactForm({
             value={formData.phone}
             onChange={(event) => handleChange("phone", event.target.value)}
             placeholder="+91 98765 43210"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
+            className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10"
           />
         </div>
 
-        <div className="md:col-span-2">
+        <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Job Title
           </label>
@@ -155,8 +155,8 @@ export default function ContactForm({
             onChange={(event) =>
               handleChange("job_title", event.target.value)
             }
-            placeholder="Example: Founder, HR Manager, Sales Lead"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
+            placeholder="Example: Founder"
+            className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10"
           />
         </div>
       </div>
@@ -164,9 +164,9 @@ export default function ContactForm({
       <button
         type="submit"
         disabled={isSubmitting || companies.length === 0}
-        className="mt-6 w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
+        className="mt-6 w-full rounded-xl bg-cyan-400 px-5 py-3 font-bold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isSubmitting ? "Saving Contact..." : "Add Contact"}
+        {isSubmitting ? "Creating Contact..." : "Create Contact"}
       </button>
     </form>
   );
