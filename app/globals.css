@@ -317,3 +317,137 @@ body {
     linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
   background-size: 48px 48px;
 }
+.crm-shell {
+  position: relative;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(34, 211, 238, 0.11), transparent 28%),
+    radial-gradient(circle at 88% 18%, rgba(37, 99, 235, 0.12), transparent 30%),
+    radial-gradient(circle at 55% 75%, rgba(168, 85, 247, 0.06), transparent 34%),
+    #020617;
+}
+
+.crm-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.035) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: linear-gradient(to bottom, black, transparent 92%);
+  opacity: 0.55;
+}
+
+.crm-main {
+  position: relative;
+  z-index: 1;
+}
+
+.crm-page-reveal {
+  animation: crmPageReveal 0.55s ease-out both;
+}
+
+.crm-surface {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025)),
+    rgba(15, 23, 42, 0.48);
+  box-shadow:
+    0 22px 80px rgba(2, 6, 23, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(18px);
+}
+
+.crm-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(34, 211, 238, 0.1), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.045), transparent 45%);
+  opacity: 0;
+  transition: opacity 220ms ease;
+  pointer-events: none;
+}
+
+.crm-surface:hover::before {
+  opacity: 1;
+}
+
+.crm-surface > * {
+  position: relative;
+  z-index: 1;
+}
+
+.crm-card-hover {
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.crm-card-hover:hover {
+  transform: translateY(-3px);
+  border-color: rgba(34, 211, 238, 0.34);
+  box-shadow:
+    0 26px 90px rgba(2, 6, 23, 0.5),
+    0 0 0 1px rgba(34, 211, 238, 0.08);
+}
+
+.crm-table-row {
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.crm-table-row:hover {
+  background-color: rgba(255, 255, 255, 0.045);
+  border-color: rgba(34, 211, 238, 0.22);
+}
+
+.crm-focus-ring:focus {
+  border-color: rgba(34, 211, 238, 0.85);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.12);
+}
+
+.crm-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(34, 211, 238, 0.24),
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+}
+
+@keyframes crmPageReveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crm-page-reveal,
+  .crm-card-hover,
+  .crm-table-row {
+    animation: none;
+    transition: none;
+  }
+
+  .crm-card-hover:hover {
+    transform: none;
+  }
+}

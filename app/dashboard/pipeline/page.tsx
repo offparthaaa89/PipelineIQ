@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import EmptyState from "@/components/shared/EmptyState";
 import ErrorState from "@/components/shared/ErrorState";
 import LoadingState from "@/components/shared/LoadingState";
@@ -30,6 +31,23 @@ const getStatusFromStage = (stage: DealStage): DealStatus => {
   return "open";
 };
 
+const formatStageLabel = (stage: DealStage) => {
+  return stage.charAt(0).toUpperCase() + stage.slice(1);
+};
+
+const isDealOverdue = (deal: DealWithRelations) => {
+  if (!deal.expected_close_date || deal.status !== "open") {
+    return false;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const closeDate = new Date(`${deal.expected_close_date}T00:00:00`);
+
+  return closeDate < today;
+};
+
 export default function PipelinePage() {
   const [deals, setDeals] = useState<DealWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +63,10 @@ export default function PipelinePage() {
     }).format(value);
   };
 
-  const fetchPipelineDeals = async () => {
+  const fetchPipelineDeals = useCallback(async () => {
+    setIsLoading(true);
+    setError("");
+
     const {
       data: { user },
       error: userError,
@@ -90,12 +111,12 @@ export default function PipelinePage() {
 
     setDeals((data || []) as DealWithRelations[]);
     setIsLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPipelineDeals();
-  }, []);
+  }, [fetchPipelineDeals]);
 
   const handleStageChange = async (dealId: string, nextStage: DealStage) => {
     setError("");
@@ -196,12 +217,17 @@ export default function PipelinePage() {
       )
     );
 
-    setSuccessMessage("Deal stage updated successfully.");
+    setSuccessMessage(
+      `"${targetDeal.title}" moved to ${formatStageLabel(nextStage)}.`
+    );
     setUpdatingDealId(null);
   };
 
-  const openDeals = deals.filter((deal) => deal.status === "open");
-  const wonDeals = deals.filter((deal) => deal.status === "won");
+  const visibleDeals = deals.filter((deal) => deal.status !== "archived");
+  const openDeals = visibleDeals.filter((deal) => deal.status === "open");
+  const wonDeals = visibleDeals.filter((deal) => deal.status === "won");
+  const lostDeals = visibleDeals.filter((deal) => deal.status === "lost");
+  const overdueDeals = openDeals.filter(isDealOverdue);
 
   const activePipelineValue = openDeals.reduce(
     (total, deal) => total + Number(deal.value || 0),
@@ -213,28 +239,89 @@ export default function PipelinePage() {
     0
   );
 
+  const closedDealsCount = wonDeals.length + lostDeals.length;
+  const winRate =
+    closedDealsCount === 0
+      ? 0
+      : Math.round((wonDeals.length / closedDealsCount) * 100);
+
   return (
-    <main className="min-h-screen bg-slate-950 px-5 py-6 text-white md:px-8">
-      <section className="w-full">
-        <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-300">
-            PipelineIQ CRM
-          </p>
+    <main className="crm-page-reveal min-h-screen px-5 py-8 text-white md:px-10">
+      <section className="mx-auto max-w-[1800px]">
+        <div className="mb-6 grid gap-5 xl:grid-cols-[1.35fr_0.75fr]">
+          <section className="crm-surface rounded-[2rem] p-6 md:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">
+                  Pipeline Workspace
+                </p>
 
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">
-            Sales Pipeline
-          </h1>
+                <h1 className="mt-4 max-w-4xl text-3xl font-black tracking-tight text-white md:text-5xl">
+                  Move opportunities from first signal to closed outcome.
+                </h1>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-            Visualize opportunities by stage, review pipeline value, and track
-            how deals move from new opportunities to closed outcomes.
-          </p>
+                <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-400 md:text-base">
+                  This board shows where every deal currently sits. Use it to
+                  spot stuck opportunities, overdue closes, and the next stage
+                  each deal should move into.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+                <Link
+                  href="/dashboard/deals"
+                  className="rounded-xl bg-cyan-400 px-5 py-3 text-center text-sm font-black text-slate-950 shadow-lg shadow-cyan-400/20 transition hover:-translate-y-0.5 hover:bg-cyan-300"
+                >
+                  Add / Manage Deals
+                </Link>
+
+                <Link
+                  href="/dashboard"
+                  className="rounded-xl border border-white/10 px-5 py-3 text-center text-sm font-bold text-slate-200 transition hover:-translate-y-0.5 hover:border-cyan-400/50 hover:bg-white/5 hover:text-cyan-300"
+                >
+                  Back to Overview
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          <aside className="crm-surface rounded-[2rem] p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+              Pipeline signal
+            </p>
+
+            <div className="mt-4 grid gap-3">
+              <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+                <p className="text-sm font-bold text-white">Win rate</p>
+                <p className="mt-2 text-3xl font-black text-cyan-300">
+                  {winRate}%
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  Based on won vs lost closed deals.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+                <p className="text-sm font-bold text-white">Needs attention</p>
+                <p
+                  className={`mt-2 text-3xl font-black ${
+                    overdueDeals.length > 0 ? "text-amber-300" : "text-emerald-300"
+                  }`}
+                >
+                  {overdueDeals.length}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  Open deals past expected close date.
+                </p>
+              </div>
+            </div>
+          </aside>
         </div>
 
         {error && <ErrorState message={error} />}
 
         {successMessage && (
-          <div className="mb-6 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-300">
+          <div className="mb-6 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm font-bold text-emerald-300">
             {successMessage}
           </div>
         )}
@@ -246,8 +333,8 @@ export default function PipelinePage() {
             <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
               <StatCard
                 label="Total Deals"
-                value={deals.length}
-                helperText="All opportunities"
+                value={visibleDeals.length}
+                helperText="Visible opportunities"
               />
 
               <StatCard
@@ -269,14 +356,59 @@ export default function PipelinePage() {
               />
             </div>
 
-            {deals.length === 0 ? (
-              <EmptyState
-                title="No pipeline deals yet"
-                description="Create your first deal from the Deals page to start building your pipeline."
-              />
+            <section className="crm-surface rounded-[2rem] p-5">
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
+                    Board rule
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    Use stages to show progress, not random labels. Every move
+                    should reflect a real sales step.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
+                    Open focus
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    New, qualified, proposal, and negotiation are active
+                    pipeline stages.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
+                    Outcome stages
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    Won and lost are closed outcomes, but you can still move a
+                    deal back if it was marked incorrectly.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {visibleDeals.length === 0 ? (
+              <section className="crm-surface rounded-[2rem] p-6">
+                <EmptyState
+                  title="No pipeline deals yet"
+                  description="Create your first deal from the Deals page to start building your pipeline."
+                />
+
+                <div className="mt-5 flex justify-center">
+                  <Link
+                    href="/dashboard/deals"
+                    className="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-300"
+                  >
+                    Create First Deal
+                  </Link>
+                </div>
+              </section>
             ) : (
               <PipelineBoard
-                deals={deals}
+                deals={visibleDeals}
                 updatingDealId={updatingDealId}
                 onStageChange={handleStageChange}
               />

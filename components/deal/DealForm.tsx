@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useState, type FormEvent } from "react";
 import type { Company } from "@/types/company";
 import type { ContactWithCompany } from "@/types/contact";
 import type { DealCurrency, DealStage, NewDealInput } from "@/types/deal";
@@ -23,8 +24,25 @@ const dealStages: DealStage[] = [
 
 const currencies: DealCurrency[] = ["INR", "USD", "EUR", "GBP"];
 
+const inputClass =
+  "crm-focus-ring w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 disabled:cursor-not-allowed disabled:opacity-60";
+
 const formatStageLabel = (stage: DealStage) => {
   return stage.charAt(0).toUpperCase() + stage.slice(1);
+};
+
+const formatCurrencyPreview = (value: string, currency: DealCurrency) => {
+  const numericValue = Number(value);
+
+  if (!value || !Number.isFinite(numericValue)) {
+    return "No value entered";
+  }
+
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  }).format(numericValue);
 };
 
 export default function DealForm({
@@ -43,22 +61,49 @@ export default function DealForm({
     expected_close_date: "",
   });
 
-  const handleChange = (field: keyof NewDealInput, value: string) => {
+  const availableCompanies = companies.filter(
+    (company) => company.status !== "archived"
+  );
+
+  const availableContacts = contacts.filter(
+    (contact) => contact.status !== "archived"
+  );
+
+  const handleChange = <K extends keyof NewDealInput>(
+    field: K,
+    value: NewDealInput[K]
+  ) => {
     setFormData((currentData) => ({
       ...currentData,
       [field]: value,
     }));
   };
 
-  const selectedCompany = companies.find(
+  const selectedCompany = availableCompanies.find(
     (company) => company.id === formData.company_id
   );
 
+  const selectedContact = availableContacts.find(
+    (contact) => contact.id === formData.contact_id
+  );
+
   const filteredContacts = formData.company_id
-    ? contacts.filter((contact) => contact.company_id === formData.company_id)
+    ? availableContacts.filter(
+        (contact) => contact.company_id === formData.company_id
+      )
     : [];
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const completedFields = [
+    formData.company_id,
+    formData.title,
+    formData.value,
+    formData.stage,
+    formData.expected_close_date,
+  ].filter((value) => value.trim().length > 0).length;
+
+  const progressPercentage = Math.round((completedFields / 5) * 100);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (isSubmitting) {
@@ -81,26 +126,100 @@ export default function DealForm({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-lg shadow-slate-950/20"
-    >
-      <div className="mb-5 border-b border-white/10 pb-5">
+    <form onSubmit={handleSubmit} className="crm-surface rounded-[2rem] p-5">
+      <div className="mb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-300">
-          New Opportunity
+          New opportunity
         </p>
 
-        <h2 className="mt-2 text-xl font-bold text-white">Add Deal</h2>
+        <h2 className="mt-2 text-2xl font-black text-white">Add Deal</h2>
 
         <p className="mt-2 text-sm leading-6 text-slate-400">
-          Create a sales opportunity and connect it to the correct company and
-          contact.
+          Create a sales opportunity and connect it to the correct company,
+          contact, value, stage, and close timeline.
+        </p>
+      </div>
+
+      <div className="mb-6 rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm font-bold text-white">Deal readiness</p>
+
+          <span className="text-xs font-black text-cyan-300">
+            {progressPercentage}%
+          </span>
+        </div>
+
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-800">
+          <div
+            className="h-full rounded-full bg-cyan-400 transition-all"
+            style={{ width: `${progressPercentage}%` }}
+          />
+        </div>
+
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          Company, title, value, stage, and close date make this deal easier to
+          manage inside the pipeline.
+        </p>
+      </div>
+
+      {companies.length === 0 && (
+        <div className="mb-5 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4">
+          <p className="text-sm font-black text-amber-300">
+            Create a company first
+          </p>
+
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            Deals must belong to a company. Add a company before creating sales
+            opportunities.
+          </p>
+
+          <Link
+            href="/dashboard/companies"
+            className="mt-4 inline-flex rounded-xl bg-amber-300 px-4 py-2 text-sm font-black text-slate-950 transition hover:bg-amber-200"
+          >
+            Add Company
+          </Link>
+        </div>
+      )}
+
+      {companies.length > 0 && availableCompanies.length === 0 && (
+        <div className="mb-5 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4">
+          <p className="text-sm font-black text-amber-300">
+            No usable company available
+          </p>
+
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            All companies are archived. Restore a company before creating new
+            deals.
+          </p>
+
+          <Link
+            href="/dashboard/companies"
+            className="mt-4 inline-flex rounded-xl bg-amber-300 px-4 py-2 text-sm font-black text-slate-950 transition hover:bg-amber-200"
+          >
+            Manage Companies
+          </Link>
+        </div>
+      )}
+
+      <div className="mb-5 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
+          Value preview
+        </p>
+
+        <p className="mt-2 text-2xl font-black text-white">
+          {formatCurrencyPreview(formData.value, formData.currency)}
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-slate-400">
+          This value will contribute to open pipeline value when the deal stage
+          is active.
         </p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-bold text-slate-300">
             Company *
           </label>
 
@@ -110,27 +229,34 @@ export default function DealForm({
               handleChange("company_id", event.target.value);
               handleChange("contact_id", "");
             }}
-            disabled={isSubmitting}
-            className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isSubmitting || availableCompanies.length === 0}
+            className={inputClass}
           >
             <option value="">Select a company</option>
 
-            {companies.map((company) => (
+            {availableCompanies.map((company) => (
               <option key={company.id} value={company.id}>
-                {company.name}
+                {company.status === "inactive"
+                  ? `${company.name} (Inactive)`
+                  : company.name}
               </option>
             ))}
           </select>
 
-          {companies.length === 0 && (
-            <p className="mt-2 text-xs leading-5 text-amber-300">
-              Create a company before adding deals.
+          {selectedCompany ? (
+            <p className="mt-2 text-xs text-cyan-300">
+              Deal will be linked to {selectedCompany.name}
+              {selectedCompany.status === "inactive" ? " (inactive)." : "."}
+            </p>
+          ) : (
+            <p className="mt-2 text-xs text-slate-500">
+              Archived companies are hidden from new deal creation.
             </p>
           )}
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-bold text-slate-300">
             Contact
           </label>
 
@@ -138,7 +264,7 @@ export default function DealForm({
             value={formData.contact_id}
             onChange={(event) => handleChange("contact_id", event.target.value)}
             disabled={!formData.company_id || isSubmitting}
-            className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
+            className={inputClass}
           >
             <option value="">
               {formData.company_id
@@ -153,28 +279,35 @@ export default function DealForm({
 
               return (
                 <option key={contact.id} value={contact.id}>
-                  {fullName}
+                  {contact.status === "inactive"
+                    ? `${fullName} (Inactive)`
+                    : fullName}
                 </option>
               );
             })}
           </select>
 
-          {formData.company_id && selectedCompany && (
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Showing contacts linked to {selectedCompany.name}.
+          {selectedContact ? (
+            <p className="mt-2 text-xs text-cyan-300">
+              Follow-up contact: {selectedContact.first_name}
+              {selectedContact.last_name ? ` ${selectedContact.last_name}` : ""}
+              {selectedContact.status === "inactive" ? " (inactive)." : "."}
             </p>
-          )}
-
-          {formData.company_id && filteredContacts.length === 0 && (
+          ) : formData.company_id && filteredContacts.length === 0 ? (
             <p className="mt-2 text-xs leading-5 text-slate-500">
-              No contacts found for this company. You can still create the deal
-              without selecting a contact.
+              No active or inactive contacts found for this company. Archived
+              contacts are hidden, but you can still create the deal without
+              selecting a contact.
+            </p>
+          ) : (
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Optional, but useful for follow-up ownership.
             </p>
           )}
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-bold text-slate-300">
             Deal Title *
           </label>
 
@@ -184,13 +317,13 @@ export default function DealForm({
             onChange={(event) => handleChange("title", event.target.value)}
             disabled={isSubmitting}
             placeholder="Example: CRM Trial Project"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
+            className={inputClass}
           />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-[1fr_110px]">
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-sm font-bold text-slate-300">
               Deal Value *
             </label>
 
@@ -202,12 +335,12 @@ export default function DealForm({
               onChange={(event) => handleChange("value", event.target.value)}
               disabled={isSubmitting}
               placeholder="50000"
-              className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-sm font-bold text-slate-300">
               Currency
             </label>
 
@@ -217,7 +350,7 @@ export default function DealForm({
                 handleChange("currency", event.target.value as DealCurrency)
               }
               disabled={isSubmitting}
-              className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
+              className={inputClass}
             >
               {currencies.map((currency) => (
                 <option key={currency} value={currency}>
@@ -229,7 +362,7 @@ export default function DealForm({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-bold text-slate-300">
             Pipeline Stage
           </label>
 
@@ -239,7 +372,7 @@ export default function DealForm({
               handleChange("stage", event.target.value as DealStage)
             }
             disabled={isSubmitting}
-            className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
+            className={inputClass}
           >
             {dealStages.map((stage) => (
               <option key={stage} value={stage}>
@@ -247,10 +380,14 @@ export default function DealForm({
               </option>
             ))}
           </select>
+
+          <p className="mt-2 text-xs leading-5 text-slate-500">
+            Won and lost stages automatically set the deal status.
+          </p>
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-bold text-slate-300">
             Expected Close Date
           </label>
 
@@ -261,18 +398,27 @@ export default function DealForm({
               handleChange("expected_close_date", event.target.value)
             }
             disabled={isSubmitting}
-            className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
+            className={inputClass}
           />
+
+          <p className="mt-2 text-xs leading-5 text-slate-500">
+            Close date helps prioritize deals that need attention soon.
+          </p>
         </div>
       </div>
 
       <button
         type="submit"
-        disabled={isSubmitting || companies.length === 0}
-        className="mt-6 w-full rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={isSubmitting || availableCompanies.length === 0}
+        className="mt-6 w-full rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-cyan-400/20 transition hover:-translate-y-0.5 hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSubmitting ? "Saving Deal..." : "Create Deal"}
       </button>
+
+      <p className="mt-4 text-center text-xs leading-5 text-slate-500">
+        Best flow: Company → Contact → Deal → Pipeline. Archived records are
+        protected from new work.
+      </p>
     </form>
   );
 }

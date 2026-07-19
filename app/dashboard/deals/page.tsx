@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import DealForm from "@/components/deal/DealForm";
 import DealList from "@/components/deal/DealList";
@@ -47,6 +48,21 @@ const sortOptions: { label: string; value: SortOption }[] = [
   { label: "Highest value", value: "highest-value" },
   { label: "Lowest value", value: "lowest-value" },
   { label: "Closest close date", value: "closest-close-date" },
+];
+
+const dealWorkflowTips = [
+  {
+    title: "Attach the right company",
+    description: "Every opportunity should belong to a clear business account.",
+  },
+  {
+    title: "Select a real stage",
+    description: "Stage shows where the opportunity sits in the sales process.",
+  },
+  {
+    title: "Track close timing",
+    description: "Expected close dates help you prioritize urgent deals.",
+  },
 ];
 
 export default function DealsPage() {
@@ -162,6 +178,7 @@ export default function DealsPage() {
 
   const openDeals = deals.filter((deal) => deal.status === "open").length;
   const wonDeals = deals.filter((deal) => deal.status === "won").length;
+  const lostDeals = deals.filter((deal) => deal.status === "lost").length;
 
   const totalPipelineValue = deals
     .filter((deal) => deal.status === "open")
@@ -179,6 +196,11 @@ export default function DealsPage() {
 
     return closeDate >= today && closeDate <= nextThirtyDays;
   }).length;
+
+  const winRate =
+    wonDeals + lostDeals > 0
+      ? Math.round((wonDeals / (wonDeals + lostDeals)) * 100)
+      : 0;
 
   const filteredDeals = [...deals]
     .filter((deal) => {
@@ -410,37 +432,88 @@ export default function DealsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 px-5 py-6 text-white md:px-8">
+    <main className="crm-page-reveal min-h-screen px-5 py-6 text-white md:px-8">
       <section className="w-full">
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-300">
-              PipelineIQ CRM
+        <div className="mb-6 grid gap-5 xl:grid-cols-[1.35fr_0.75fr]">
+          <section className="crm-surface rounded-[2rem] p-6 md:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">
+                  Deal Workspace
+                </p>
+
+                <h1 className="mt-4 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
+                  Turn sales opportunities into a trackable pipeline.
+                </h1>
+
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-400 md:text-base">
+                  Deals are where company relationships become business value.
+                  Track value, stage, contact context, and expected close dates
+                  before moving opportunities across the pipeline.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+                <button
+                  type="button"
+                  onClick={handleScrollToForm}
+                  className="rounded-xl bg-cyan-400 px-5 py-3 text-center text-sm font-black text-slate-950 shadow-lg shadow-cyan-400/20 transition hover:-translate-y-0.5 hover:bg-cyan-300"
+                >
+                  + Add Deal
+                </button>
+
+                <Link
+                  href="/dashboard/pipeline"
+                  className="rounded-xl border border-white/10 px-5 py-3 text-center text-sm font-bold text-slate-200 transition hover:-translate-y-0.5 hover:border-cyan-400/50 hover:bg-white/5 hover:text-cyan-300"
+                >
+                  Open Pipeline
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          <aside className="crm-surface rounded-[2rem] p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+              Pipeline health
             </p>
 
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">
-              Deals
-            </h1>
+            <div className="mt-4">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-4xl font-black text-white">{winRate}%</p>
+                  <p className="mt-1 text-sm text-slate-400">
+                    win rate from closed deals
+                  </p>
+                </div>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-              Track opportunities, deal values, contacts, companies, and sales
-              movement across your pipeline.
+                <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-xs font-bold text-cyan-300">
+                  {wonDeals} won / {lostDeals} lost
+                </div>
+              </div>
+
+              <div className="mt-5 h-2 overflow-hidden rounded-full bg-slate-800">
+                <div
+                  className="h-full rounded-full bg-cyan-400 transition-all"
+                  style={{ width: `${winRate}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="crm-divider my-5" />
+
+            <p className="text-sm font-bold text-white">Urgency signal</p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              {upcomingCloseDates} open deal
+              {upcomingCloseDates === 1 ? "" : "s"} closing within the next 30
+              days.
             </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleScrollToForm}
-            className="w-fit rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
-          >
-            + Add Deal
-          </button>
+          </aside>
         </div>
 
         {error && <ErrorState message={error} />}
 
         {successMessage && (
-          <div className="mb-6 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-300">
+          <div className="mb-6 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm font-bold text-emerald-300 shadow-lg shadow-emerald-950/20">
             {successMessage}
           </div>
         )}
@@ -476,13 +549,54 @@ export default function DealsPage() {
                 />
               </div>
 
+              <section className="crm-surface rounded-[2rem] p-5">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-300">
+                      Deal operating rules
+                    </p>
+
+                    <h2 className="mt-2 text-xl font-black text-white">
+                      Keep opportunity tracking clear
+                    </h2>
+                  </div>
+
+                  <p className="max-w-xl text-sm leading-6 text-slate-400">
+                    A useful deal needs a company, a clear value, a stage, and a
+                    close target.
+                  </p>
+                </div>
+
+                <div className="mt-5 grid gap-3 md:grid-cols-3">
+                  {dealWorkflowTips.map((tip) => (
+                    <div
+                      key={tip.title}
+                      className="crm-card-hover rounded-2xl border border-white/10 bg-slate-950/45 p-4"
+                    >
+                      <p className="text-sm font-black text-white">
+                        {tip.title}
+                      </p>
+
+                      <p className="mt-2 text-sm leading-6 text-slate-400">
+                        {tip.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
               {deals.length > 0 && (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-lg shadow-slate-950/20">
-                  <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                <section className="crm-surface rounded-[2rem] p-5">
+                  <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                      <h2 className="text-lg font-bold text-white">
-                        Search & Filters
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-300">
+                        Search and control
+                      </p>
+
+                      <h2 className="mt-2 text-xl font-black text-white">
+                        Find the right opportunity fast
                       </h2>
+
                       <p className="mt-1 text-sm text-slate-400">
                         Showing {filteredDeals.length} of {deals.length} deals.
                       </p>
@@ -492,7 +606,7 @@ export default function DealsPage() {
                       type="button"
                       onClick={handleResetFilters}
                       disabled={!hasActiveFilters}
-                      className="w-fit rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-cyan-400/50 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="w-fit rounded-xl border border-white/10 px-4 py-2 text-sm font-bold text-white transition hover:border-cyan-400/50 hover:bg-white/5 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Reset Filters
                     </button>
@@ -500,14 +614,14 @@ export default function DealsPage() {
 
                   <div className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_180px_180px_220px]">
                     <SearchInput
-                      label="Search"
+                      label="Search deals"
                       value={searchQuery}
-                      placeholder="Search title, company, or contact..."
+                      placeholder="Search title, company, contact, stage..."
                       onChange={setSearchQuery}
                     />
 
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-300">
+                      <label className="mb-2 block text-sm font-bold text-slate-300">
                         Stage
                       </label>
                       <select
@@ -515,7 +629,7 @@ export default function DealsPage() {
                         onChange={(event) =>
                           setSelectedStage(event.target.value as "all" | DealStage)
                         }
-                        className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10"
+                        className="crm-focus-ring w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition"
                       >
                         {stageFilters.map((stage) => (
                           <option key={stage.value} value={stage.value}>
@@ -526,7 +640,7 @@ export default function DealsPage() {
                     </div>
 
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-300">
+                      <label className="mb-2 block text-sm font-bold text-slate-300">
                         Status
                       </label>
                       <select
@@ -536,7 +650,7 @@ export default function DealsPage() {
                             event.target.value as "all" | DealStatus
                           )
                         }
-                        className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10"
+                        className="crm-focus-ring w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition"
                       >
                         {statusFilters.map((status) => (
                           <option key={status.value} value={status.value}>
@@ -547,7 +661,7 @@ export default function DealsPage() {
                     </div>
 
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-300">
+                      <label className="mb-2 block text-sm font-bold text-slate-300">
                         Sort
                       </label>
                       <select
@@ -555,7 +669,7 @@ export default function DealsPage() {
                         onChange={(event) =>
                           setSortBy(event.target.value as SortOption)
                         }
-                        className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10"
+                        className="crm-focus-ring w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition"
                       >
                         {sortOptions.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -565,13 +679,26 @@ export default function DealsPage() {
                       </select>
                     </div>
                   </div>
-                </div>
+                </section>
               )}
 
-              {deals.length === 0 ? (
+              {companies.length === 0 ? (
+                <EmptyState
+                  title="Create a company first"
+                  description="Deals need to be connected to a company. Add your first company before creating deal records."
+                  action={
+                    <Link
+                      href="/dashboard/companies"
+                      className="inline-flex rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-300"
+                    >
+                      Add Company
+                    </Link>
+                  }
+                />
+              ) : deals.length === 0 ? (
                 <EmptyState
                   title="No deals yet"
-                  description="Add your first deal from the right panel to start tracking your sales pipeline."
+                  description="Add your first deal from the right panel to start tracking sales movement."
                 />
               ) : filteredDeals.length === 0 ? (
                 <EmptyState
@@ -584,6 +711,16 @@ export default function DealsPage() {
             </div>
 
             <aside ref={formPanelRef} className="xl:sticky xl:top-24">
+              <div className="mb-4 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-4">
+                <p className="text-sm font-black text-cyan-200">
+                  Deal creation rule
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  Create deals only after selecting the correct company. Contact
+                  selection is optional, but helpful for follow-up context.
+                </p>
+              </div>
+
               <DealForm
                 companies={companies}
                 contacts={contacts}
