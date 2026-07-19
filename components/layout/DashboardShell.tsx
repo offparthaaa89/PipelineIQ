@@ -30,6 +30,11 @@ const navigationItems = [
     href: "/dashboard/deals",
     icon: "🤝",
   },
+  {
+    label: "Pipeline",
+    href: "/dashboard/pipeline",
+    icon: "📊",
+  },
 ];
 
 export default function DashboardShell({ children }: DashboardShellProps) {
@@ -45,7 +50,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-  
+
       setUserEmail(user?.email || "");
     };
 
@@ -78,23 +83,25 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <div className="flex min-h-screen">
-      <aside className="hidden w-64 shrink-0 border-r border-white/10 bg-slate-950/95 px-4 py-6 lg:block">
-        <div className="flex items-center gap-3 px-1">
-        <div className="relative flex h-11 w-11 shrink-0 items-center justify-center">
-        <div className="absolute h-9 w-9 rotate-45 rounded-lg border-2 border-cyan-400/80" />
-        <div className="absolute h-5 w-5 rotate-45 rounded bg-cyan-400/20" />
-         <span className="relative text-sm font-black text-cyan-300">PI</span>
-        </div>
+        <aside className="hidden w-52 shrink-0 border-r border-white/10 bg-slate-950/95 px-3 py-6 lg:block">
+          <div className="flex items-center gap-2 px-1">
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center">
+              <div className="absolute h-8 w-8 rotate-45 rounded-lg border-2 border-cyan-400/80" />
+              <div className="absolute h-4 w-4 rotate-45 rounded bg-cyan-400/20" />
+              <span className="relative text-xs font-black text-cyan-300">
+                PI
+              </span>
+            </div>
 
-        <div>
-          <p className="text-lg font-black uppercase tracking-wide text-white">
-            PIPELINEIQ
-          </p>
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300">
-            CRM
-          </p>
-       </div>
-       </div>
+            <div className="min-w-0">
+              <p className="truncate text-base font-black uppercase tracking-wide text-white">
+                PIPELINEIQ
+              </p>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-300">
+                CRM
+              </p>
+            </div>
+          </div>
 
           <nav className="mt-8 space-y-2">
             {navigationItems.map((item) => {
@@ -102,19 +109,19 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
               return (
                 <Link
-                   key={item.href}
-                   href={item.href}
-                   className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-cyan-300 ${
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-cyan-300 ${
                     isActive
-                     ? "bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10"
-                     : "text-slate-300 hover:bg-white/5 hover:text-white"
+                      ? "bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10"
+                      : "text-slate-300 hover:bg-white/5 hover:text-white"
                   }`}
-                 >
-                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-sm">
-                     {item.icon}
-                   </span>
-                   <span>{item.label}</span>
-                 </Link>
+                >
+                  <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/5 text-xs">
+                    {item.icon}
+                  </span>
+                  <span className="truncate">{item.label}</span>
+                </Link>
               );
             })}
           </nav>
@@ -133,13 +140,14 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                 </button>
 
                 <div>
-                 <p className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-300">
-                   Pipeline Workspace
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-300">
+                    Pipeline Workspace
                   </p>
                   <p className="mt-1 hidden text-sm text-slate-400 sm:block">
-                     Manage your CRM records with clear actions and secure user-scoped data.
-                   </p>
-               </div>
+                    Manage your CRM records with clear actions and secure
+                    user-scoped data.
+                  </p>
+                </div>
               </div>
 
               <button
@@ -164,22 +172,24 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
               <aside className="relative h-full w-80 max-w-[85vw] border-r border-white/10 bg-slate-950 px-5 py-6 shadow-2xl">
                 <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                <div className="relative flex h-11 w-11 shrink-0 items-center justify-center">
-                <div className="absolute h-9 w-9 rotate-45 rounded-lg border-2 border-cyan-400/80" />
-                <div className="absolute h-5 w-5 rotate-45 rounded bg-cyan-400/20" />
-                 <span className="relative text-sm font-black text-cyan-300">PI</span>
-                </div>
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex h-11 w-11 shrink-0 items-center justify-center">
+                      <div className="absolute h-9 w-9 rotate-45 rounded-lg border-2 border-cyan-400/80" />
+                      <div className="absolute h-5 w-5 rotate-45 rounded bg-cyan-400/20" />
+                      <span className="relative text-sm font-black text-cyan-300">
+                        PI
+                      </span>
+                    </div>
 
-                <div>
-                  <p className="text-lg font-black uppercase tracking-wide text-white">
-                    PIPELINEIQ
-                  </p>
-                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300">
-                    CRM
-                  </p>
-                </div>
-              </div>
+                    <div>
+                      <p className="text-lg font-black uppercase tracking-wide text-white">
+                        PIPELINEIQ
+                      </p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300">
+                        CRM
+                      </p>
+                    </div>
+                  </div>
 
                   <button
                     type="button"
@@ -196,20 +206,20 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
                     return (
                       <Link
-                         key={item.href}
-                         href={item.href}
-                         onClick={() => setIsMobileMenuOpen(false)}
-                         className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-cyan-300 ${
-                         isActive
-                           ? "bg-cyan-400 text-slate-950"
-                           : "text-slate-300 hover:bg-white/5 hover:text-white"
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-cyan-300 ${
+                          isActive
+                            ? "bg-cyan-400 text-slate-950"
+                            : "text-slate-300 hover:bg-white/5 hover:text-white"
                         }`}
                       >
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-sm">
-                       {item.icon}
-                    </span>
-                    <span>{item.label}</span>
-                  </Link>
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-sm">
+                          {item.icon}
+                        </span>
+                        <span>{item.label}</span>
+                      </Link>
                     );
                   })}
                 </nav>
@@ -219,20 +229,19 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                     Signed in
                   </p>
 
-                <div className="mt-3 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-cyan-400/30 bg-cyan-400/10 text-sm font-bold text-cyan-300">
-                  {userInitial}
-                </div>
+                  <div className="mt-3 flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-cyan-400/30 bg-cyan-400/10 text-sm font-bold text-cyan-300">
+                      {userInitial}
+                    </div>
 
-                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-white">
-                   {userEmail || "Loading user"}
-                  </p>
-                  <p className="text-xs text-slate-500">Workspace owner</p>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-white">
+                        {userEmail || "Loading user"}
+                      </p>
+                      <p className="text-xs text-slate-500">Workspace owner</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-             </div>
-
               </aside>
             </div>
           )}
