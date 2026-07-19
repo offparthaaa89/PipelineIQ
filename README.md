@@ -1,36 +1,210 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PipelineIQ
 
-## Getting Started
+PipelineIQ is a multi-user B2B sales CRM built with Next.js, TypeScript, Tailwind CSS, Supabase Auth, Supabase PostgreSQL, and Supabase Row Level Security.
 
-First, run the development server:
+The application helps users manage a complete sales workflow:
+
+Company → Contact → Deal → Pipeline → Dashboard
+
+Each logged-in user gets a private CRM workspace where they can create companies, attach contacts, track deals, move opportunities through pipeline stages, and manage record lifecycle using active, inactive, and archived states.
+
+---
+
+## Live Demo
+
+Production URL: https://pipeline-iq-nine.vercel.app/
+
+GitHub Repository: https://github.com/offparthaaa89/PipelineIQ
+
+---
+
+## Features
+
+### Authentication
+
+- User registration
+- User login
+- User logout
+- Protected dashboard routes
+- Public landing page
+- Logged-in landing navbar state with workspace shortcut
+
+### Dashboard
+
+- CRM overview dashboard
+- Total companies count
+- Total contacts count
+- Total deals count
+- Open pipeline value
+- Recent companies
+- Recent deals
+- Quick action shortcuts
+
+### Companies
+
+- Create companies
+- View company records
+- Search companies
+- Track company status
+- Mark company as active, inactive, or archived
+- Archived companies are hidden from new contact and deal creation
+
+### Contacts
+
+- Create contacts under companies
+- View contact records with linked company context
+- Search and filter contacts
+- Track contact status
+- Mark contact as active, inactive, or archived
+- Archived contacts are hidden from new deal creation
+
+### Deals
+
+- Create deals linked to companies and optional contacts
+- View all deals
+- Search, filter, and sort deals
+- View deal detail page
+- Edit deal information
+- Delete deal with confirmation modal
+- Track deal stage, status, value, currency, and expected close date
+
+### Pipeline
+
+- Kanban-style pipeline board
+- Deal stages:
+  - New
+  - Qualified
+  - Proposal
+  - Negotiation
+  - Won
+  - Lost
+- Move deals using dropdown
+- Move deals using Previous / Next buttons
+- Optimistic UI update with rollback on database failure
+- Stage value totals
+- Win rate signal
+- Overdue deal signal
+- Responsive horizontal board layout
+
+### Record Lifecycle
+
+PipelineIQ uses lifecycle states instead of immediately deleting important CRM records.
+
+Supported statuses:
+
+- Active
+- Inactive
+- Archived
+
+Archived records are preserved for historical context but hidden from new creation forms. This keeps the CRM clean without losing old business data.
+
+---
+
+## Tech Stack
+
+### Frontend
+
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+
+### Backend / Database
+
+- Supabase Auth
+- Supabase PostgreSQL
+- Supabase Row Level Security
+
+### Deployment
+
+- Vercel
+
+### Version Control
+
+- Git
+- GitHub
+
+---
+
+## Security Decisions
+
+PipelineIQ is designed as a multi-user CRM, so private workspace separation is important.
+
+Implemented security measures:
+
+- Supabase Authentication for user identity
+- Row Level Security enabled on database tables
+- User-owned company and contact records using `user_id`
+- User-owned deal records using `owner_id`
+- Dashboard data fetched only for the authenticated user
+- Deal updates scoped using both deal `id` and `owner_id`
+- Archived records hidden from new work creation
+- Protected dashboard access after logout
+
+---
+
+## Database Structure
+
+### Companies
+
+Stores business account records.
+
+Main fields:
+
+- id
+- user_id
+- name
+- website
+- industry
+- size
+- location
+- status
+- created_at
+- updated_at
+
+### Contacts
+
+Stores people connected to companies.
+
+Main fields:
+
+- id
+- user_id
+- company_id
+- first_name
+- last_name
+- email
+- phone
+- job_title
+- status
+- created_at
+- updated_at
+
+### Deals
+
+Stores sales opportunities.
+
+Main fields:
+
+- id
+- owner_id
+- company_id
+- contact_id
+- title
+- value
+- currency
+- stage
+- status
+- expected_close_date
+- created_at
+- updated_at
+
+---
+
+## Local Setup
+
+### 1. Clone the repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+git clone https://github.com/offparthaaa89/PipelineIQ.git
+cd PipelineIQ
