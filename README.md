@@ -231,6 +231,12 @@ Please do not enter sensitive or personal information into the demo workspace.
 
 ---
 
+## Demo Video
+
+A short product walkthrough video has been recorded and will be added here shortly.
+
+---
+
 ## Project Context
 
 PipelineIQ was developed as part of a full-stack development trial task provided by Digital Heroes.
