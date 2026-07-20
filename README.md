@@ -237,6 +237,14 @@ A short product walkthrough video has been recorded and will be added here short
 
 ---
 
+## Case Study
+
+A detailed case study is available here:
+
+[Read the PipelineIQ case study](CASE_STUDY.md)
+
+---
+
 ## Project Context
 
 PipelineIQ was developed as part of a full-stack development trial task provided by Digital Heroes.
