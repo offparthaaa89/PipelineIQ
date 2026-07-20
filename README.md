@@ -18,6 +18,26 @@ GitHub Repository: https://github.com/offparthaaa89/PipelineIQ
 
 ---
 
+## Screenshots
+
+### Landing Page
+
+![PipelineIQ landing page](docs/screenshots/landing.png)
+
+### Dashboard Overview
+
+![PipelineIQ dashboard overview](docs/screenshots/dashboard.png)
+
+### Deals Workspace
+
+![PipelineIQ deals workspace](docs/screenshots/deals.png)
+
+### Pipeline Board
+
+![PipelineIQ pipeline kanban board](docs/screenshots/pipeline.png)
+
+---
+
 ## Features
 
 ### Authentication
