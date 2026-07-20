@@ -221,6 +221,16 @@ Main fields:
 
 ---
 
+## Project Context
+
+PipelineIQ was developed as part of a full-stack development trial task provided by Digital Heroes.
+
+The implementation, engineering decisions, UI development, authentication flow, database relationships, dashboard experience, and deployment setup were completed by Parth.
+
+This project was built as an independent trial-task submission and is not an official Digital Heroes product.
+
+---
+
 ## Local Setup
 
 ### 1. Clone the repository
