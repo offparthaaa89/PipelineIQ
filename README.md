@@ -221,6 +221,16 @@ Main fields:
 
 ---
 
+## Demo Credentials
+
+A demo account has been prepared with sample CRM data for reviewers.
+
+Demo login details are shared in the trial-task submission message for safer access.
+
+Please do not enter sensitive or personal information into the demo workspace.
+
+---
+
 ## Project Context
 
 PipelineIQ was developed as part of a full-stack development trial task provided by Digital Heroes.
